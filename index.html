@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Eternal Cycle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:italic,wght@400;700&family=Inter:wght@300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-night: #020205;
+            --bg-dawn: #1a0f05;
+            --sun: #ff9d00;
+            --moon: #e2e8f0;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-night);
+            transition: background-color 2.5s var(--ease);
+            overflow: hidden;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .universe {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        /* The Celestial Body */
+        #orb {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: relative;
+            transition: 
+                transform 2.5s var(--ease), 
+                background-color 2.5s var(--ease), 
+                box-shadow 2.5s var(--ease),
+                opacity 2s var(--ease);
+            margin-bottom: 100px;
+        }
+
+        /* States */
+        .is-sun {
+            background-color: var(--sun);
+            box-shadow: 0 0 120px rgba(255, 157, 0, 0.5);
+            transform: scale(1.3) translateY(0);
+            opacity: 1;
+        }
+
+        .is-moon {
+            background-color: var(--moon);
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.15);
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Animation: Sinking below the text */
+        .is-sinking {
+            transform: translateY(250px) scale(0.4);
+            opacity: 0;
+        }
+
+        /* Animation: Rising from the bottom */
+        .is-rising {
+            transition: none; /* Snap to bottom first */
+            transform: translateY(300px) scale(0.4);
+            opacity: 0;
+        }
+
+        /* Text Styling */
+        #text-container {
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        #message {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #ffffff;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: opacity 1s var(--ease), transform 1s var(--ease);
+            text-align: center;
+            font-style: italic;
+            letter-spacing: -0.5px;
+        }
+
+        .show-text {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        .counter {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body onclick="progress()">
+
+    <div class="universe">
+        <div id="orb" class="is-moon"></div>
+        <div id="text-container">
+            <div id="message">Tap to begin the cycle</div>
+        </div>
+        <div id="counter" class="counter">01 / 04</div>
+    </div>
+
+    <script>
+        const story = [
+            { text: "The sun loved the moon so much", state: "sun" },
+            { text: "He died every night", state: "sinking" },
+            { text: "just to let her breathe", state: "moon" },
+            { text: "until he rose again", state: "rising" }
+        ];
+
+        let currentStep = -1;
+        const orb = document.getElementById('orb');
+        const msg = document.getElementById('message');
+        const counter = document.getElementById('counter');
+        const body = document.body;
+
+        function progress() {
+            currentStep = (currentStep + 1) % story.length;
+            const stage = story[currentStep];
+
+            // Update Counter
+            counter.innerText = `0${currentStep + 1} / 04`;
+
+            // Text Fade Out
+            msg.classList.remove('show-text');
+
+            setTimeout(() => {
+                msg.innerText = stage.text;
+                
+                if (stage.state === "sun") {
+                    orb.style.transition = "all 2.5s var(--ease)";
+                    orb.className = "is-sun";
+                    body.style.backgroundColor = "var(--bg-dawn)";
+                } 
+                else if (stage.state === "sinking") {
+                    orb.className = "is-sun is-sinking";
+                    body.style.backgroundColor = "var(--bg-night)";
+                } 
+                else if (stage.state === "moon") {
+                    orb.className = "is-moon";
+                    body.style.backgroundColor = "var(--bg-night)";
+                }
+                else if (stage.state === "rising") {
+                    // Start from the bottom hidden
+                    orb.style.transition = "none";
+                    orb.className = "is-rising";
+                    
+                    // Force a reflow to make the transition work
+                    orb.offsetHeight; 
+
+                    // Rise back up
+                    orb.style.transition = "all 2.5s var(--ease)";
+                    orb.className = "is-sun";
+                    body.style.backgroundColor = "var(--bg-dawn)";
+                }
+
+                msg.classList.add('show-text');
+            }, 600);
+        }
+    </script>
+</body>
+</html>
